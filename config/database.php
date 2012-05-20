@@ -64,6 +64,27 @@ $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 
+/** 1st try at connecting to info_schema...
+ * Didn't work too well, seemed to set the default DB to this, and I'm not
+ * Using a reference to connect to the default so don't want to refactor just
+ * to check the info_schema...
+ * Using a DSN string method works fine.
+$db['info']['hostname'] = 'localhost';
+$db['info']['username'] = 'root';
+$db['info']['password'] = 'root';
+$db['info']['database'] = 'information_schema';
+$db['info']['dbdriver'] = 'mysql';
+$db['info']['dbprefix'] = '';
+$db['info']['pconnect'] = TRUE;
+$db['info']['db_debug'] = TRUE;
+$db['info']['cache_on'] = FALSE;
+$db['info']['cachedir'] = '';
+$db['info']['char_set'] = 'utf8';
+$db['info']['dbcollat'] = 'utf8_general_ci';
+$db['info']['swap_pre'] = '';
+$db['info']['autoinit'] = TRUE;
+$db['info']['stricton'] = FALSE;
+*/
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

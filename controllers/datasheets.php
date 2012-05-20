@@ -35,10 +35,25 @@ class DataSheets extends CI_Controller {
     }
     
     /**
-     *  Show table
-     */
+    *  Show table
+    */   
     
     public function table($tableName = FALSE) {
+        if($tableName && $this->db->table_exists($tableName)) {
+            $this->load->model('DSTable', 'table');
+            $this->table->setTable($tableName);
+            $data['table'] = $this->table;
+            $this->load->view('table_jqgrid', $data);
+        } else {
+            exit('No table selected');
+        }
+    }
+    
+    /**
+     *  Show table **OLD**
+     */
+    
+    public function table_old($tableName = FALSE) {
         if($tableName && $this->db->table_exists($tableName)) {
             //Return a single row using the standard query to get the full field details -
             //this is kinda pointless so could be optimized here!
@@ -53,12 +68,11 @@ class DataSheets extends CI_Controller {
         }
     }
     
-    /**
-     *  Provides the table data for the jqGrid
-     */
-    
     public function tabledata($tableName = FALSE) {
         if($tableName == FALSE) exit('Table name not specified');
+        $this->load->model('DSTable', 'table');
+        $this->table->setTable($tableName);
+        
         // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
         // Get the requested page. By default grid sets this to 1. 
         if(isset($_GET['page'])) {
@@ -86,6 +100,62 @@ class DataSheets extends CI_Controller {
         } else {
             $data['sidx'] = "id";
         }
+        
+        $rows = $this->table->getData($data['limit'], $data['page'], $data['sidx'], $data['sord']);
+        
+        $jsonObj = array(
+            'total' => $this->table->totalPages,
+            'page' => $this->table->page,
+            'records' => $this->table->count,
+            'rows' => $rows
+        );
+        /*foreach($data['query']->result_array() as $row) {
+            $rowObj = array('id' => $row['id']);
+            $rowObj['cell'] = array_values($row);
+            $jsonObj['rows'][] = $rowObj;
+        }*/
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($jsonObj));
+    }
+    
+    /**
+     *  Provides the table data for the jqGrid
+     */
+    
+    public function tabledata_old($tableName = FALSE) {
+        if($tableName == FALSE) exit('Table name not specified');
+        $this->load->model('DSTable', 'table');
+        $this->table->setTable($tableName);
+        
+        // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
+        // Get the requested page. By default grid sets this to 1. 
+        if(isset($_GET['page'])) {
+            $data['page'] = (string) $_GET['page']; 
+        } else {
+            $data['page'] = (string) 1;
+        }
+        if(isset($_GET['rows'])) {
+        // get how many rows we want to have into the grid - rowNum parameter in the grid
+            $data['limit'] = (string) $_GET['rows'];
+        } else {
+            $data['limit'] = (string) 20;
+        }
+        // sorting order - at first time sortorder 
+        if(isset($_GET['sord'])) {
+            $data['sord'] = $_GET['sord'];
+        } else {
+            $data['sord'] = "asc";
+        }
+        // if we not pass at first time index use the first column for the index or what you want
+        if(isset($_GET['sidx'])) {
+            // get index row - i.e. user click to sort. At first time sortname parameter -
+            // after that the index from colModel 
+            $data['sidx'] = $_GET['sidx'];   
+        } else {
+            $data['sidx'] = "id";
+        }
+        
         // calculate the number of rows for the query. We need this for paging the result
         $data['count'] = (string) $this->db->count_all($tableName);
         // calculate the total pages for the query 
@@ -164,7 +234,7 @@ class DataSheets extends CI_Controller {
      *  oper	edit
      */
     
-    public function editcell($tableName = FALSE) {
+    public function editcell_old($tableName = FALSE) {
         if($tableName == FALSE) exit('Table name not specified');
         // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
         // Get the requested page. By default grid sets this to 1. 
@@ -184,6 +254,31 @@ class DataSheets extends CI_Controller {
             break;
             case 'add':
                 $this->db->insert($tableName, $editedCells);
+            break;
+        }       
+    }
+    
+    public function editcell($tableName = FALSE) {
+        if($tableName == FALSE) exit('Table name not specified');
+        // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
+        // Get the requested page. By default grid sets this to 1. 
+        if(isset($_POST['id'])) {
+            $data['id'] = (string) $_POST['id']; 
+        } 
+        if(isset($_POST['oper'])) {
+            $data['oper'] = (string) $_POST['oper'];
+        }
+        $editedCells = array_diff_key($_POST, array('id'=> 0, 'oper' => ''));
+        //Create table object
+        $this->load->model('DSTable', 'table');
+        $this->table->setTable($tableName);
+        
+        switch ($data['oper']) {
+            case 'edit':
+                $this->table->updateRow($data['id'], $editedCells);
+            break;
+            case 'add':
+                $this->table->insertRow($editedCells);
             break;
         }       
     }
@@ -250,9 +345,14 @@ class DataSheets extends CI_Controller {
         } else {
             exit('Tablename not specified or table doesn\'t exist');
         }
-        
-        
-        
+    }
+    
+    public function testQuery() {
+        $infoDB = $this->load->database('info', TRUE);
+        $query = $infoDB->query("SELECT COLUMN_NAME, TABLE_NAME FROM COLUMNS WHERE COLUMN_NAME LIKE 'ref_%_id' AND TABLE_SCHEMA = 'datasheets1'");
+        foreach($query->result() as $row) {
+            echo($row->COLUMN_NAME." is in ".$row->TABLE_NAME."<br />");
+        }
     }
     
 }

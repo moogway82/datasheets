@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?=ucfirst($table->tableName)?> Table</title>
+<title><?=ucfirst($title)?> Table</title>
  
 <link rel="stylesheet" type="text/css" media="screen" href="<?=base_url()?>css/ui-lightness/jquery-ui-1.8.19.custom.css" />
 <link rel="stylesheet" type="text/css" media="screen" href="<?=base_url()?>css/ui.jqgrid.css" />
@@ -22,48 +22,43 @@ html, body {
 $(function(){ 
     $("#list").jqGrid({
         url:'<?=site_url('/datasheets/tabledata').'/'.$this->uri->segment(3)?>',
-        shrinkToFit: true,
-        height: 'auto',
         datatype: 'json',
         mtype: 'GET',
         cellEdit: true,
         cellsubmit: 'remote',
         cellurl: '<?=site_url('/datasheets/editcell').'/'.$this->uri->segment(3)?>',
-        afterSubmitCell: function() { $('#list').trigger("reloadGrid"); return [true, '']; },
         editurl: '<?=site_url('/datasheets/editcell').'/'.$this->uri->segment(3)?>',
         colNames:[
-        <?php foreach($table->columns as $field): ?>
-            '<?=$field->printHeaderName()?>',
+        <?php foreach($tablefields as $field): ?>
+            '<?=$field?>',
         <?php endforeach; ?>
         ],
         colModel :[
-        <?php foreach($table->columns as $field): ?>
-            <?=$field->printColModelCell()?>
+        <?php foreach($tablefields as $field): ?>
+            <?php if($field == 'id'): ?>
+        {name:'<?=$field?>', index:'<?=$field?>', width:200},
+            <?php else: ?>
+        {name:'<?=$field?>', index:'<?=$field?>', width:200, editable: true, edittype: 'text'}, 
+            <?php endif; ?>
         <?php endforeach; ?>
         ],
         pager: '#pager',
         rowNum:10,
         rowList:[10, 100, 1000],
-        sortname: '<?=$table->columns[0]->name?>',
+        sortname: '<?=$tablefields[0]?>',
         sortorder: 'asc',
         viewrecords: true,
         gridview: true,
-        subGrid: true,
-        caption: '<?=ucfirst($table->tableName)?>'
+        caption: '<?=ucfirst($title)?>'
     });
-    $("#list").jqGrid('navGrid','#pager',
+    jQuery("#list").jqGrid('navGrid','#pager',
         { edit: false, del: false, search: false }, //options
         {}, // edit options
-        { reloadAfterSubmit: true, closeAfterAdd: true }, // add options
+        { height:280, reloadAfterSubmit: true, closeAfterAdd: true }, // add options
         {}, // del options
         {}, // search options
         {}  // view options
     );
-    $("#list").hideCol('subgrid');
-    $(window).bind('resize', function() {
-        $("#list").setGridWidth($(window).width());
-    }).trigger('resize');
-
 }); 
 </script>
  
