@@ -48,8 +48,32 @@ $(function(){
         sortorder: 'asc',
         viewrecords: true,
         gridview: true,
+        caption: '<?=ucfirst($table->tableName)?>',
         subGrid: true,
-        caption: '<?=ucfirst($table->tableName)?>'
+        subGridRowExpanded: function(subGridDivId, rowId) {
+            $('#' + subGridDivId).html('<table id="' + subGridDivId + '_t" ></table>');
+            $('#' + subGridDivId + '_t').jqGrid({
+                url: '<?=site_url('/datasheets/tabledata').'/status'?>',
+                datatype: 'json',
+                colNames: ['Id','Name','Incidents..','Tasks...'],
+                colModel: [
+                    {name:'id', width: 2, index:'id'},
+                    {name:'name', width: 11, index:'name', editable: true, edittype: 'text'},
+                    {name:'incident', width: 20, index:'incident', sortable: false},
+                    {name:'tasks', width: 20, index:'tasks', sortable: false}
+                ],
+                rowNum: 10,
+                rowList:[10, 100, 1000],
+                sortname: 'id',
+                sortorder: 'asc',
+                height: 'auto',
+                shrinkToFit: true,
+                caption: 'SubGrid'
+            });
+            $(window).bind('resize', function() {
+                $('#' + subGridDivId + '_t').setGridWidth($(window).width() - 50);
+            }).trigger('resize');
+        }
     });
     $("#list").jqGrid('navGrid','#pager',
         { edit: false, del: false, search: false }, //options
