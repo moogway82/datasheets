@@ -49,25 +49,6 @@ class DataSheets extends CI_Controller {
         }
     }
     
-    /**
-     *  Show table **OLD**
-     */
-    
-    public function table_old($tableName = FALSE) {
-        if($tableName && $this->db->table_exists($tableName)) {
-            //Return a single row using the standard query to get the full field details -
-            //this is kinda pointless so could be optimized here!
-            $this->db->limit(1, 0);
-            $this->_setTableQueryLookups($tableName);
-            $query = $this->db->get($tableName);
-            $data['tablefields'] = $query->list_fields();
-            $data['title'] = $tableName;
-            $this->load->view('table_jqgrid', $data);
-        } else {
-            exit('No table selected');
-        }
-    }
-    
     public function tabledata($tableName = FALSE) {
         if($tableName == FALSE) exit('Table name not specified');
         $this->load->model('DSTable', 'table');
@@ -120,81 +101,6 @@ class DataSheets extends CI_Controller {
     }
     
     /**
-     *  Provides the table data for the jqGrid
-     */
-    
-    public function tabledata_old($tableName = FALSE) {
-        if($tableName == FALSE) exit('Table name not specified');
-        $this->load->model('DSTable', 'table');
-        $this->table->setTable($tableName);
-        
-        // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
-        // Get the requested page. By default grid sets this to 1. 
-        if(isset($_GET['page'])) {
-            $data['page'] = (string) $_GET['page']; 
-        } else {
-            $data['page'] = (string) 1;
-        }
-        if(isset($_GET['rows'])) {
-        // get how many rows we want to have into the grid - rowNum parameter in the grid
-            $data['limit'] = (string) $_GET['rows'];
-        } else {
-            $data['limit'] = (string) 20;
-        }
-        // sorting order - at first time sortorder 
-        if(isset($_GET['sord'])) {
-            $data['sord'] = $_GET['sord'];
-        } else {
-            $data['sord'] = "asc";
-        }
-        // if we not pass at first time index use the first column for the index or what you want
-        if(isset($_GET['sidx'])) {
-            // get index row - i.e. user click to sort. At first time sortname parameter -
-            // after that the index from colModel 
-            $data['sidx'] = $_GET['sidx'];   
-        } else {
-            $data['sidx'] = "id";
-        }
-        
-        // calculate the number of rows for the query. We need this for paging the result
-        $data['count'] = (string) $this->db->count_all($tableName);
-        // calculate the total pages for the query 
-        if( $data['count'] > 0 && $data['limit'] > 0) { 
-            $data['total_pages'] = (string) ceil($data['count']/$data['limit']); 
-        } else { 
-            $data['total_pages'] = (string) 0; 
-        }
-        // if for some reasons the requested page is greater than the total 
-        // set the requested page to total page 
-        if ($data['page'] > $data['total_pages']) $data['page'] = $data['total_pages'];
-        // calculate the starting position of the rows 
-        $data['start'] = $data['limit'] * $data['page'] - $data['limit'];
-        // if for some reasons start position is negative set it to 0 
-        // typical case is that the user type 0 for the requested page 
-        if($data['start'] <0) $data['start'] = 0; 
-        // the actual query for the grid data 
-        $this->db->order_by($data['sidx'], $data['sord']);
-        $this->db->limit($data['limit'], $data['start']);
-        $this->_setTableQueryLookups($tableName);
-        $data['query'] = $this->db->get($tableName);
-        
-        $jsonObj = array(
-            'total' => $data['total_pages'],
-            'page' => $data['page'],
-            'records' => $data['count'],
-            'rows' => array()
-        );
-        foreach($data['query']->result_array() as $row) {
-            $rowObj = array('id' => $row['id']);
-            $rowObj['cell'] = array_values($row);
-            $jsonObj['rows'][] = $rowObj;
-        }
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($jsonObj));
-    }
-    
-    /**
      *  Builds the query with the lookup selects and joins
      */
     
@@ -233,30 +139,6 @@ class DataSheets extends CI_Controller {
      *  name	green
      *  oper	edit
      */
-    
-    public function editcell_old($tableName = FALSE) {
-        if($tableName == FALSE) exit('Table name not specified');
-        // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
-        // Get the requested page. By default grid sets this to 1. 
-        if(isset($_POST['id'])) {
-            $data['id'] = (string) $_POST['id']; 
-        } 
-        
-        if(isset($_POST['oper'])) {
-            $data['oper'] = (string) $_POST['oper'];
-        }
-        
-        $editedCells = array_diff_key($_POST, array('id'=> 0, 'oper' => ''));
-        switch ($data['oper']) {
-            case 'edit':
-                $this->db->where('id', $data['id']);
-                $this->db->update($tableName, $editedCells);
-            break;
-            case 'add':
-                $this->db->insert($tableName, $editedCells);
-            break;
-        }       
-    }
     
     public function editcell($tableName = FALSE) {
         if($tableName == FALSE) exit('Table name not specified');
