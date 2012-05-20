@@ -13,6 +13,8 @@ class DataSheets extends CI_Controller {
         parent::__construct();
         $this->load->helper('url');
         $this->load->helper('form');
+        include('/Applications/MAMP/htdocs/datasheets/application/models/dstable.php');
+        include('/Applications/MAMP/htdocs/datasheets/application/models/dscolumn.php');
     }
     
     /**
@@ -40,9 +42,10 @@ class DataSheets extends CI_Controller {
     
     public function table($tableName = FALSE) {
         if($tableName && $this->db->table_exists($tableName)) {
-            $this->load->model('DSTable', 'table');
-            $this->table->setTable($tableName);
-            $data['table'] = $this->table;
+            //$this->load->model('DSTable_Mod', 'table');
+            $table = new DSTable($this->db, $this->load, $tableName);
+            //$table->setTable($tableName);
+            $data['table'] = $table;
             $this->load->view('table_jqgrid', $data);
         } else {
             exit('No table selected');
@@ -50,9 +53,11 @@ class DataSheets extends CI_Controller {
     }
     
     public function tabledata($tableName = FALSE) {
+        
         if($tableName == FALSE) exit('Table name not specified');
-        $this->load->model('DSTable', 'table');
-        $this->table->setTable($tableName);
+        //$this->load->model('DSTable_Mod', 'table');
+        //$this->table->setTable($tableName);
+        $table = new DSTable($this->db, $this->load, $tableName);
         
         // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
         // Get the requested page. By default grid sets this to 1. 
@@ -82,12 +87,12 @@ class DataSheets extends CI_Controller {
             $data['sidx'] = "id";
         }
         
-        $rows = $this->table->getData($data['limit'], $data['page'], $data['sidx'], $data['sord']);
+        $rows = $table->getData($data['limit'], $data['page'], $data['sidx'], $data['sord']);
         
         $jsonObj = array(
-            'total' => $this->table->totalPages,
-            'page' => $this->table->page,
-            'records' => $this->table->count,
+            'total' => $table->totalPages,
+            'page' => $table->page,
+            'records' => $table->count,
             'rows' => $rows
         );
         /*foreach($data['query']->result_array() as $row) {
@@ -152,15 +157,16 @@ class DataSheets extends CI_Controller {
         }
         $editedCells = array_diff_key($_POST, array('id'=> 0, 'oper' => ''));
         //Create table object
-        $this->load->model('DSTable', 'table');
-        $this->table->setTable($tableName);
+        //$this->load->model('DSTable_Mod', 'table');
+        //$this->table->setTable($tableName);
+        $table = new DSTable($this->db, $this->load, $tableName);
         
         switch ($data['oper']) {
             case 'edit':
-                $this->table->updateRow($data['id'], $editedCells);
+                $table->updateRow($data['id'], $editedCells);
             break;
             case 'add':
-                $this->table->insertRow($editedCells);
+                $table->insertRow($editedCells);
             break;
         }       
     }

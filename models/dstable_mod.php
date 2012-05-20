@@ -7,25 +7,13 @@
  *
  *  Extended CI_Model so that I can use the standard CI classes, like query without having to pass references and stuff.  Also
  *  this is kinda like the model and stuff...
- *
- *  This is back to a good-ol' object, not a CI_Model, so that I can instanciate it and
- *  avoid the confusion of CI's model instanciation.
- *
- *  The only features it was using from CI_Model was the 'db' and 'load' objects, so I'll
- *  need to pass them in to keep working the way I am...
  */
 
-class DSTable {
-
-    // CI refs
-    public $db;
-    public $load;
+class DSTable_Mod extends CI_Model {
 
     // Table meta
     public $tableName;
     public $columns;
-    public $subTables;
-    
     
     // Table data?
     public $count;
@@ -33,12 +21,19 @@ class DSTable {
     public $page;
     public $rows;
     
-    function __construct($db, $load, $tableName) {
-        $this->columns = array();
-        $this->subTables = array();
+    function __construct() {
         
-        $this->db = $db;
-        $this->load = $load;
+        parent::__construct();
+        
+        include('dscolumn.php');
+        $this->columns = array();
+    }
+    
+    /**
+     *  This sets the columns for the named table
+     */
+    
+    function setTable($tableName) {
         
         $this->tableName = $tableName;
         
@@ -93,7 +88,6 @@ class DSTable {
         $query = $infoDB->query("SELECT COLUMN_NAME, TABLE_NAME FROM COLUMNS WHERE COLUMN_NAME = 'ref_".$this->tableName."_id' AND TABLE_SCHEMA = 'datasheets1'");
         foreach($query->result() as $row) {
             $this->columns[] = new DSColumn($this, $row->TABLE_NAME, $row->TABLE_NAME, 4);
-            $this->subTables[] = new DSTable($this->db, $this->load, $row->TABLE_NAME);
         }
         $infoDB->close();
     }
@@ -138,7 +132,6 @@ class DSTable {
                     //$this->db->join($column->lookupTable, $this->tableName.'.'.$column->name.' = '.$column->lookupTable.'.id', 'left');
                 break;
                 case 4:
-                    //DEPRECATED, should be using subTables now
                     //Lists all the many lookup columns, this will get added to the data array.
                     $manyTables[] = $column->lookupTable;
                 break;
@@ -161,32 +154,25 @@ class DSTable {
         // For each row in the main table results
         foreach($query->result_array() as $row) {
             $manyCols = array();
-            // For each 'sub table' for this table...
-            foreach($this->subTables as $subTable) {
-                $manyCols[] = '<input type="button" value="+" onclick=\'$("#list").toggleSubGridRow("'.$row['id'].'");\'/> '.$subTable->getAsManyColumn($row['id'], $this->tableName);
+            // For each 'many column' for this table...
+            foreach($manyTables as $manyTable) {
+                // Run a query for using row id to filter
+                $this->db->select("name");
+                $this->db->where("ref_".$this->tableName."_id", $row['id']);
+                $this->db->limit(5);
+                $manyQuery = $this->db->get($manyTable);
+                $manyString = array();
+                //For each row in the results
+                foreach($manyQuery->result() as $manyRow) {
+                    // Concatenate into a single row (like transpose)
+                    $manyString[] = $manyRow->name;
+                }
+                $manyCols[] = '<input type="button" value="+" onclick=\'$("#list").toggleSubGridRow("'.$row['id'].'");\'/> '.implode(", ", $manyString);
             }
             $rowObj = array('id' => $row['id'], 'cell' => array_merge(array_values($row), $manyCols));
             $jqRows[] = $rowObj;
         }
         return $jqRows;
-    }
-    
-    /**
-     *  Display's the table as a cell in a row for the Many Columns
-     */
-    
-    function getAsManyColumn($id, $lookupCol) {
-        $this->db->select("name");
-        $this->db->where('ref_'.$lookupCol.'_id', $id);
-        $this->db->limit(5);
-        $manyQuery = $this->db->get($this->tableName);
-        $manyString = array();
-        //For each row in the results
-        foreach($manyQuery->result() as $manyRow) {
-            // Concatenate into a single row (like transpose)
-            $manyString[] = $manyRow->name;
-        }
-        return implode(", ", $manyString);
     }
     
     function updateRow($id, $editedCells) {
