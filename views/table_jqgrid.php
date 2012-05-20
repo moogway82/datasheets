@@ -52,7 +52,8 @@ $(function(){
         subGrid: true,
         subGridRowExpanded: function(subGridDivId, rowId) {
             $('#' + subGridDivId).html('<table id="' + subGridDivId + '_t" ></table>');
-            $('#' + subGridDivId + '_t').jqGrid({
+            $('#' + subGridDivId + '_t').jqGrid(jqSubGridOptions[DS_lastExpandCol]);                
+            /*{
                 url: '<?=site_url('/datasheets/tabledata').'/status'?>',
                 datatype: 'json',
                 colNames: ['Id','Name','Incidents..','Tasks...'],
@@ -69,7 +70,7 @@ $(function(){
                 height: 'auto',
                 shrinkToFit: true,
                 caption: 'SubGrid'
-            });
+            });*/
             $(window).bind('resize', function() {
                 $('#' + subGridDivId + '_t').setGridWidth($(window).width() - 50);
             }).trigger('resize');
@@ -87,8 +88,33 @@ $(function(){
     $(window).bind('resize', function() {
         $("#list").setGridWidth($(window).width());
     }).trigger('resize');
+    
+});
+var jqSubGridOptions = new Array();
+<?php foreach($table->subTables as $subTable): ?>
+jqSubGridOptions.push({
+    url: '<?=site_url('/datasheets/tabledata').'/'.$subTable->tableName?>',
+    datatype: 'json',
+    colNames: [
+        <?php foreach($subTable->columns as $col): ?>
+            '<?=$col->printHeaderName()?>',
+        <?php endforeach; ?>
+    ],
+    colModel: [
+        <?php foreach($subTable->columns as $col): ?>
+            <?=$col->printColModelCell()?>
+        <?php endforeach; ?>
+    ],
+    rowNum: 10,
+    rowList:[10, 100, 1000],
+    sortname: '<?=$table->columns[0]->name?>',
+    sortorder: 'asc',
+    height: 'auto',
+    shrinkToFit: true,
+    caption: '<?=ucfirst($table->tableName)?>'
+});
+<?php endforeach; ?>
 
-}); 
 </script>
  
 </head>

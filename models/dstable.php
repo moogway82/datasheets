@@ -160,13 +160,15 @@ class DSTable {
         $jqRows = array();
         // For each row in the main table results
         foreach($query->result_array() as $row) {
+            $manyColInd = 0;
             $manyCols = array();
             // For each 'sub table' for this table...
             foreach($this->subTables as $subTable) {
-                $manyCols[] = '<input type="button" value="+" onclick=\'$("#list").toggleSubGridRow("'.$row['id'].'");\'/> '.$subTable->getAsManyColumn($row['id'], $this->tableName);
+                $manyCols[] = '<input type="button" value="+" onclick=\'DS_lastExpandCol = '.$manyColInd++.'; $("#list").toggleSubGridRow("'.$row['id'].'");\'/> '.$subTable->getAsManyColumn($row['id'], $this->tableName);
             }
             $rowObj = array('id' => $row['id'], 'cell' => array_merge(array_values($row), $manyCols));
             $jqRows[] = $rowObj;
+            
         }
         return $jqRows;
     }
@@ -187,6 +189,14 @@ class DSTable {
             $manyString[] = $manyRow->name;
         }
         return implode(", ", $manyString);
+    }
+    
+    function getSubTable($tableName) {
+        foreach($this->subTables as $subTable) {
+            if($subTable->tableName == $tableName) {
+                return $subTable;
+            }
+        }
     }
     
     function updateRow($id, $editedCells) {
