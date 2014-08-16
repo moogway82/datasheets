@@ -120,13 +120,13 @@ class DSColumn {
                 return ucfirst($this->lookupTable);
             break;
             case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE:
-                return ucfirst($this->lookupTable.": ".$this->name);
+                return ucfirst($this->lookupTable." [".$this->name."]");
             break;
             case DSCOLUMN_COLUMN_MANY:
                 return ucfirst($this->name."...");
             break;
             case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE_LOOKUP:
-                return ucfirst($this->joinTable.": ".$this->lookupTable);
+                return ucfirst($this->joinTable." [".$this->lookupTable."]");
             break;
             default:
                 return ucfirst($this->name);

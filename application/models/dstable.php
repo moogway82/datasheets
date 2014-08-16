@@ -99,7 +99,7 @@ class DSTable {
         $query = $infoDB->query("SELECT COLUMN_NAME, TABLE_NAME FROM COLUMNS WHERE COLUMN_NAME = 'ref_".$this->tableName."_id' AND TABLE_SCHEMA = 'datasheets1'");
         foreach($query->result() as $row) {
             $this->columns[] = new DSColumn($this, $row->TABLE_NAME, $row->TABLE_NAME, 4);
-            $this->subTables[] = new DSTable($this->db, $this->load, $row->TABLE_NAME);
+            $this->subTables[] = new DSTable($this, $row->TABLE_NAME);
         }
         $infoDB->close();
     }
