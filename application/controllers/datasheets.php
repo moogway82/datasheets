@@ -43,7 +43,7 @@ class DataSheets extends CI_Controller {
     public function table($tableName = FALSE) {
         if($tableName && $this->db->table_exists($tableName)) {
             //$this->load->model('DSTable_Mod', 'table');
-            $table = new DSTable($this->db, $this->load, $tableName);
+            $table = new DSTable($this, $tableName);
             //$table->setTable($tableName);
             $data['table'] = $table;
             $this->load->view('table_jqgrid', $data);
@@ -61,7 +61,7 @@ class DataSheets extends CI_Controller {
         if($tableName == FALSE) exit('Table name not specified');
         //$this->load->model('DSTable_Mod', 'table');
         //$this->table->setTable($tableName);
-        $table = new DSTable($this->db, $this->load, $tableName);
+        $table = new DSTable($this, $tableName);
         
         // Code is taken from example on: http://www.trirand.com/jqgridwiki/doku.php?id=wiki:first_grid
         // Get the requested page. By default grid sets this to 1. 

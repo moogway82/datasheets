@@ -41,12 +41,12 @@ class DSTable {
      *
      */
     
-    function __construct($db, $load, $tableName) {
+    function __construct($ds, $tableName) {
         $this->columns = array();
         $this->subTables = array();
         
-        $this->db = $db;
-        $this->load = $load;
+        $this->db = $ds->db;
+        $this->load = $ds->load;
         
         $this->tableName = $tableName;
         
