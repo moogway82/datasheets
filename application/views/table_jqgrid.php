@@ -6,7 +6,8 @@
  
 <link rel="stylesheet" type="text/css" media="screen" href="<?=base_url()?>css/ui-lightness/jquery-ui-1.8.19.custom.css" />
 <link rel="stylesheet" type="text/css" media="screen" href="<?=base_url()?>css/ui.jqgrid.css" />
- 
+<link rel="stylesheet" type="text/css" media="screen" href="<?=base_url()?>css/datasheets.css" />
+
 <style type="text/css">
 html, body {
     margin: 0;

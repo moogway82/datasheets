@@ -94,7 +94,7 @@ class DSColumn {
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
                 if($width < strlen($this->name)) { $width = strlen($this->name); }
-                return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."'},";
+                return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."', classes: 'col-lookup'},";
             break;
             // 4 - many table column
             case DSCOLUMN_COLUMN_MANY:
@@ -105,7 +105,7 @@ class DSColumn {
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
                 if($width < strlen($this->name)) { $width = strlen($this->name); }
-                return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."'},";
+                return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."', classes: 'col-lookup'},";
             break;
             default:
                 return "{name:'".$this->name."', width: 20, index:'".$this->name."'},";
