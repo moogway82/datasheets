@@ -39,7 +39,6 @@ $(function(){
         colModel :[
         <?php foreach($table->columns as $field): ?>
         <?=$field->printColModelCell()?>
-            
         <?php endforeach; ?>
         ],
         pager: '#pager',

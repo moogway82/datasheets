@@ -31,15 +31,13 @@ class DSTable {
     public $totalPages;
     public $page;
     public $rows;
-    
-    /**
-     * Constructor which create the DataSheets Table object used to show a table.
-     *
-     * @param CI_Database $db   The database to make SQL calls to populate the table object
-     * @param CI_Loader $load   Reference to the CI loader class.  Currently only needed to run a separate query on the information_schema DB
-     * @param String $tableName The name of the table to load from the DB into the object.
-     *
-     */
+
+  /**
+   * Constructor which create the DataSheets Table object used to show a table.
+   *
+   * @param Object $ds Reference to the CI_Controller object that's used to make DB queries, etc...
+   * @param String $tableName The name of the table to load from the DB into the object.
+   */
     
     function __construct($ds, $tableName) {
         $this->columns = array();
@@ -105,19 +103,19 @@ class DSTable {
         }
         $infoDB->close();
     }
-    
-    /**
-     *  Returns the data for the table in an associated array that can be converted to JSON easily.
-     *
-     *  @param int $rows    The number of rows to return
-     *  @param int $page    The page of rows to return
-     *  @param int $sidx    The column to sort the data on
-     *  @param string $sord The sort order, either 'asc' or 'desc' for ascending or descending orders repectively.
-     *  @param string $filtercol    The column to filter the data on (WHERE)
-     *  @param string $filterid     The value to filter the column on
-     *
-     *  @return array The associated array which has the same structure as a standard JSON jqGrid data object
-     */
+
+  /**
+   *  Returns the data for the table in an associated array that can be converted to JSON easily.
+   *
+   * @param int $rows The number of rows to return
+   * @param int $page The page of rows to return
+   * @param int $sidx The column to sort the data on
+   * @param string $sord The sort order, either 'asc' or 'desc' for ascending or descending orders repectively.
+   * @param bool|string $filtercol The column to filter the data on (WHERE)
+   * @param bool|string $filterid The value to filter the column on
+   *
+   * @return array The associated array which has the same structure as a standard JSON jqGrid data object
+   */
     
     function getData($rows, $page, $sidx, $sord, $filtercol = false, $filterid = false) {
         // STEP 1 - Check and set the rows, pages and sorting parameters
@@ -200,14 +198,14 @@ class DSTable {
         }
         return $jqRows;
     }
-    
-    /**
-     *  Display's the table as a cell in a row for the Many Columns
-     *  @param int $id   The id to filter the lookup column used here
-     *  @param string $looupCol The name of the column (table) to filter on.
-     *
-     *  @return string  The comma separted names of the top 5 results.
-     */
+
+  /**
+   *  Display's the table as a cell in a row for the Many Columns
+   * @param int $id The id to filter the lookup column used here
+   * @param string $lookupCol The name of the column (table) to filter on.
+   *
+   * @return string  The comma separted names of the top 5 results.
+   */
     
     function getAsManyColumn($id, $lookupCol) {
         $this->db->select("name");
