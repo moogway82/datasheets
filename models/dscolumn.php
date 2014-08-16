@@ -10,6 +10,14 @@
  *  5 - lookup attribute lookup: the attibute column should also be lookedup in a further lookup table..
  */
 
+define("DSCOLUMN_COLUMN_ID", 0);
+define("DSCOLUMN_COLUMN_NORMAL", 1);
+define("DSCOLUMN_COLUMN_LOOKUP_KEY", 2);
+define("DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE", 3);
+define("DSCOLUMN_COLUMN_MANY", 4);
+define("DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE_LOOKUP", 5);
+
+
 class DSColumn {
     
     public $type;
@@ -51,7 +59,7 @@ class DSColumn {
     function printColModelCell() {
         switch($this->type) {
             // 0 - id column
-            case 0:
+            case DSCOLUMN_COLUMN_ID:
                 $widthQuery = $this->table->db->query("SELECT MAX(LENGTH(".$this->name.")) AS width FROM ".$this->table->tableName);
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
@@ -59,7 +67,7 @@ class DSColumn {
                 return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."'},";
             break;
             // 1 - regular attribute column
-            case 1:
+            case DSCOLUMN_COLUMN_NORMAL:
                 $widthQuery = $this->table->db->query("SELECT MAX(LENGTH(".$this->name.")) AS width FROM ".$this->table->tableName);
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
@@ -67,7 +75,7 @@ class DSColumn {
                 return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."', editable: true, edittype: 'text'},";
             break;
             // 2 - lookup key column
-            case 2:
+            case DSCOLUMN_COLUMN_LOOKUP_KEY:
                 //Run SQL to lookup drop-down options
                 $selectOptions = $this->table->db->get($this->lookupTable);
                 $selectOptionsObjStr = "";
@@ -81,7 +89,7 @@ class DSColumn {
                 return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."', editable: true, edittype: 'select', editoptions: {value:{".$selectOptionsObjStr."}}},";
             break;
             // TODO: 3 - lookup attribute column
-            case 3:
+            case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE:
                 $widthQuery = $this->table->db->query("SELECT MAX(LENGTH(".$this->name.")) AS width FROM ".$this->lookupTable);
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
@@ -89,10 +97,10 @@ class DSColumn {
                 return "{name:'".$this->name."', width: ".$width.", index:'".$this->name."'},";
             break;
             // 4 - many table column
-            case 4:
+            case DSCOLUMN_COLUMN_MANY:
                 return "{name:'".$this->name."', width: 20, index:'".$this->name."', sortable: false},";
             break;
-            case 5:
+            case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE_LOOKUP:
                 $widthQuery = $this->table->db->query("SELECT MAX(LENGTH(name)) AS width FROM ".$this->lookupTable);
                 $widthQueryResults = $widthQuery->result_array();
                 $width = $widthQueryResults[0]['width'];
@@ -108,16 +116,16 @@ class DSColumn {
     
     function printHeaderName() {
         switch($this->type) {
-            case 2:
+            case DSCOLUMN_COLUMN_LOOKUP_KEY:
                 return ucfirst($this->lookupTable);
             break;
-            case 3:
+            case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE:
                 return ucfirst($this->lookupTable.": ".$this->name);
             break;
-            case 4:
+            case DSCOLUMN_COLUMN_MANY:
                 return ucfirst($this->name."...");
             break;
-            case 5:
+            case DSCOLUMN_COLUMN_LOOKUP_ATTRIBUTE_LOOKUP:
                 return ucfirst($this->joinTable.": ".$this->lookupTable);
             break;
             default:

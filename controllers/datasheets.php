@@ -32,8 +32,8 @@ class DataSheets extends CI_Controller {
      */
     
     public function tables() {
-        $data['tables'] = $this->db->list_tables();
-		$this->load->view('tables', $data);
+      $data['tables'] = $this->db->list_tables();
+		  $this->load->view('tables', $data);
     }
     
     /**
@@ -90,8 +90,16 @@ class DataSheets extends CI_Controller {
         } else {
             $data['sidx'] = "id";
         }
+        // if we get passed a row and lookup table, then data will be filtered with them.
+        if(isset($_GET['filtercol']) && isset($_GET['filterid'])) {
+            $data['filtercol'] = $_GET['filtercol'];
+            $data['filterid'] = $_GET['filterid'];
+        } else {
+            $data['filtercol'] = false;
+            $data['filterid'] = false;
+        }
         
-        $rows = $table->getData($data['limit'], $data['page'], $data['sidx'], $data['sord']);
+        $rows = $table->getData($data['limit'], $data['page'], $data['sidx'], $data['sord'], $data['filtercol'], $data['filterid']);
         
         $jsonObj = array(
             'total' => $table->totalPages,

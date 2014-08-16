@@ -33,12 +33,13 @@ $(function(){
         editurl: '<?=site_url('/datasheets/editcell').'/'.$this->uri->segment(3)?>',
         colNames:[
         <?php foreach($table->columns as $field): ?>
-            '<?=$field->printHeaderName()?>',
+        '<?=$field->printHeaderName()?>',
         <?php endforeach; ?>
         ],
         colModel :[
         <?php foreach($table->columns as $field): ?>
-            <?=$field->printColModelCell()?>
+        <?=$field->printColModelCell()?>
+            
         <?php endforeach; ?>
         ],
         pager: '#pager',
@@ -51,26 +52,26 @@ $(function(){
         caption: '<?=ucfirst($table->tableName)?>',
         subGrid: true,
         subGridRowExpanded: function(subGridDivId, rowId) {
-            $('#' + subGridDivId).html('<table id="' + subGridDivId + '_t" ></table>');
-            $('#' + subGridDivId + '_t').jqGrid(jqSubGridOptions[DS_lastExpandCol]);                
-            /*{
-                url: '<?=site_url('/datasheets/tabledata').'/status'?>',
-                datatype: 'json',
-                colNames: ['Id','Name','Incidents..','Tasks...'],
-                colModel: [
-                    {name:'id', width: 2, index:'id'},
-                    {name:'name', width: 11, index:'name', editable: true, edittype: 'text'},
-                    {name:'incident', width: 20, index:'incident', sortable: false},
-                    {name:'tasks', width: 20, index:'tasks', sortable: false}
-                ],
-                rowNum: 10,
-                rowList:[10, 100, 1000],
-                sortname: 'id',
-                sortorder: 'asc',
-                height: 'auto',
-                shrinkToFit: true,
-                caption: 'SubGrid'
-            });*/
+            var subgrid_table_id, pager_id;
+            subgrid_table_id = subGridDivId + '_t';
+            pager_id = 'p_' + subgrid_table_id;            
+            $('#' + subGridDivId).html('<table id="' + subgrid_table_id + '" ></table><div id="' + pager_id + '" ></div>');
+            $('#' + subgrid_table_id).jqGrid({                
+                url: jqSubGridOptions[DS_lastExpandCol].url + '&filterid=' + rowId,
+                datatype: jqSubGridOptions[DS_lastExpandCol].datatype,
+                colNames: jqSubGridOptions[DS_lastExpandCol].colNames,
+                colModel: jqSubGridOptions[DS_lastExpandCol].colModel,
+                rowNum: jqSubGridOptions[DS_lastExpandCol].rowNum,
+                rowList:jqSubGridOptions[DS_lastExpandCol].rowList,
+                sortname: jqSubGridOptions[DS_lastExpandCol].sortname,
+                sortorder: jqSubGridOptions[DS_lastExpandCol].sortorder,
+                height: jqSubGridOptions[DS_lastExpandCol].height,
+                shrinkToFit: jqSubGridOptions[DS_lastExpandCol].shrinkToFit,
+                caption: jqSubGridOptions[DS_lastExpandCol].caption
+            });
+            $('#' + subgrid_table_id).jqGrid('navGrid', '#' + pager_id,
+                { edit: false, del: false, search: false }, {}, {}, {}, {}, {} 
+            );
             $(window).bind('resize', function() {
                 $('#' + subGridDivId + '_t').setGridWidth($(window).width() - 50);
             }).trigger('resize');
@@ -93,25 +94,31 @@ $(function(){
 var jqSubGridOptions = new Array();
 <?php foreach($table->subTables as $subTable): ?>
 jqSubGridOptions.push({
-    url: '<?=site_url('/datasheets/tabledata').'/'.$subTable->tableName?>',
+    url: '<?=site_url('/datasheets/tabledata').'/'.$subTable->tableName.'?filtercol='.$table->tableName?>',
+    cellEdit: true,
+    cellsubmit: 'remote',
+    cellurl: '<?=site_url('/datasheets/editcell').'/'.$this->uri->segment(3)?>',
+    afterSubmitCell: function() { $('this').trigger("reloadGrid"); return [true, '']; },
+    editurl: '<?=site_url('/datasheets/editcell').'/'.$this->uri->segment(3)?>',
     datatype: 'json',
     colNames: [
         <?php foreach($subTable->columns as $col): ?>
-            '<?=$col->printHeaderName()?>',
+        '<?=$col->printHeaderName()?>',
         <?php endforeach; ?>
     ],
     colModel: [
         <?php foreach($subTable->columns as $col): ?>
-            <?=$col->printColModelCell()?>
+        <?=$col->printColModelCell()?>
+        
         <?php endforeach; ?>
     ],
     rowNum: 10,
     rowList:[10, 100, 1000],
-    sortname: '<?=$table->columns[0]->name?>',
+    sortname: '<?=$subTable->columns[0]->name?>',
     sortorder: 'asc',
     height: 'auto',
     shrinkToFit: true,
-    caption: '<?=ucfirst($table->tableName)?>'
+    caption: '<?=ucfirst($subTable->tableName)?>'
 });
 <?php endforeach; ?>
 
