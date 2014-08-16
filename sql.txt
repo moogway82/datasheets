@@ -1,0 +1,2 @@
+SELECT * FROM `general_log` WHERE argument LIKE '%incident%'
+ORDER BY event_time DESC
