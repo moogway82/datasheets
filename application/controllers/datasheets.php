@@ -171,7 +171,7 @@ class DataSheets extends CI_Controller {
         //Create table object
         //$this->load->model('DSTable_Mod', 'table');
         //$this->table->setTable($tableName);
-        $table = new DSTable($this->db, $this->load, $tableName);
+        $table = new DSTable($this, $tableName);
         
         switch ($data['oper']) {
             case 'edit':
